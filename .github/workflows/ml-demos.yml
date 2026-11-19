@@ -30,7 +30,7 @@ jobs:
             echo "::notice::HF_TOKEN secret is not set yet; nothing to deploy."
             exit 0
           fi
-          pip install -q "huggingface_hub>=0.25"
+          pip install -q "huggingface_hub>=0.25" requests
           python - <<'PY'
           import os
           from huggingface_hub import whoami
@@ -135,7 +135,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USER: ${{ needs.check-token.outputs.hf_user }}
         run: |
-          pip install -q "huggingface_hub>=0.25"
+          pip install -q "huggingface_hub>=0.25" requests
           python - <<'PY'
           import os, sys, time
           import requests
