@@ -102,6 +102,24 @@ jobs:
           print("\nprompt-injection guardrail: OK")
           PY
 
+      - name: Retrieval check (same metric as the evaluation)
+        run: |
+          docker exec -i demo python - <<'PY'
+          import random
+          from raglab.data import is_relevant, sample, split_by_document
+          from raglab.pipeline import build_pipeline, load_config
+          cfg = load_config("configs/default.yaml")
+          pipe, _, questions, _ = build_pipeline(cfg, {"type": "extractive"})
+          _, test = split_by_document(questions, 0.3, 0)
+          qs = random.Random(1).sample(sample(test, 300, 0, 0), 60)
+          hits = pipe.retrieve_many([q.question for q in qs])
+          r1 = sum(is_relevant(h[0].chunk, q) for h, q in zip(hits, qs)) / len(qs)
+          r3 = sum(any(is_relevant(x.chunk, q) for x in h[:3]) for h, q in zip(hits, qs)) / len(qs)
+          print(f"Retrieval on {len(qs)} of the demo's example questions: R@1={r1:.3f} R@3={r3:.3f}"
+                " (evaluation on 1000 test questions: R@1=0.900, R@3=0.969)")
+          assert r1 >= 0.75, "the demo's retrieval is far below the evaluated Recall@1"
+          PY
+
       - name: Server log
         if: always()
         run: docker logs demo 2>&1 | tail -40 || true
