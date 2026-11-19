@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fake News Detection · Live Demo · Siddharth Patel</title>
+  <meta name="description" content="Live demo of a TF-IDF + Logistic Regression fake news classifier. Runs entirely in your browser.">
+  <style>
+    :root {
+      --bg: #0d1117; --panel: #161b22; --line: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --real: #3fb950; --fake: #f85149;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg); color: var(--text); line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    main { max-width: 820px; margin: 0 auto; padding: 48px 20px 48px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back { font-size: 0.9rem; }
+    h1 { font-size: 2rem; letter-spacing: -0.02em; margin-top: 16px; }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+      padding: 18px; margin-top: 24px;
+    }
+    textarea {
+      width: 100%; min-height: 190px; resize: vertical; background: var(--bg); color: var(--text);
+      border: 1px solid var(--line); border-radius: 6px; padding: 12px; font: inherit; font-size: 0.95rem;
+    }
+    textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+    button {
+      background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 999px;
+      padding: 6px 14px; font: inherit; font-size: 0.85rem; cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    button.primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; padding: 8px 20px; }
+    .label { color: var(--muted); font-size: 0.85rem; }
+    #result { display: none; }
+    .verdict { font-size: 1.6rem; font-weight: 700; }
+    .verdict.real { color: var(--real); }
+    .verdict.fake { color: var(--fake); }
+    .bar { height: 10px; border-radius: 999px; background: var(--fake); overflow: hidden; margin-top: 10px; }
+    .bar > div { height: 100%; background: var(--real); transition: width 0.3s; }
+    .barlabels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    .words { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+    .words h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+    .chip { display: inline-block; font-size: 0.82rem; border-radius: 999px; padding: 2px 10px; margin: 0 6px 6px 0; border: 1px solid; }
+    .chip.real { color: var(--real); border-color: rgba(63,185,80,0.5); }
+    .chip.fake { color: var(--fake); border-color: rgba(248,81,73,0.5); }
+    .note { color: var(--muted); font-size: 0.85rem; margin-top: 14px; }
+    h2 {
+      font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+      border-bottom: 1px solid var(--line); padding-bottom: 8px; margin: 36px 0 14px;
+    }
+    ul { margin-left: 18px; color: var(--muted); }
+    li { margin-bottom: 6px; }
+    code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-size: 0.85em; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 0.85rem; }
+    @media (max-width: 560px) { .words { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← Siddharth Patel</a>
+  <h1>📰 Fake News Detection</h1>
+  <p class="sub">
+    Paste a news article and the model guesses whether it is <b>real</b> or <b>fake</b>.
+    It runs <b>entirely in your browser</b>: nothing you type is sent anywhere.
+    <a href="https://github.com/exotic-Siddharth/Fake-News-Detection-System">Source code on GitHub</a>
+  </p>
+
+  <div class="panel">
+    <textarea id="text" placeholder="Paste a news headline and article here…"></textarea>
+    <div class="row">
+      <span class="label">Try an example:</span>
+      <button data-ex="wire">Wire-service style</button>
+      <button data-ex="nodateline">Same, without “(Reuters)”</button>
+      <button data-ex="clickbait">Clickbait style</button>
+    </div>
+    <div class="row">
+      <button class="primary" id="go">Check article</button>
+      <span class="label" id="status">Loading model…</span>
+    </div>
+  </div>
+
+  <div class="panel" id="result">
+    <div class="verdict" id="verdict"></div>
+    <div class="label" id="confidence"></div>
+    <div class="bar"><div id="barfill"></div></div>
+    <div class="barlabels"><span>Fake</span><span>Real</span></div>
+    <div class="words">
+      <div><h3>Words pushing towards real</h3><div id="realwords"></div></div>
+      <div><h3>Words pushing towards fake</h3><div id="fakewords"></div></div>
+    </div>
+    <p class="note" id="known"></p>
+  </div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li><b>TF-IDF</b> turns the text into numbers: each of the 10,000 most common training words gets a score
+      that is higher when it appears often in this article but rarely across all articles.</li>
+    <li><b>Logistic Regression</b> gives every word a weight. Positive weights point to real news, negative
+      weights to fake news, and the total becomes a probability.</li>
+    <li>Trained on 44,898 articles; <b>0.98 accuracy</b> on a held-out 20% split. The weights were exported
+      from the trained scikit-learn model to this page and give the same probabilities (checked on 300 test articles).</li>
+  </ul>
+
+  <h2>Limitations (worth trying!)</h2>
+  <ul>
+    <li><b>Source shortcut:</b> 98.9% of the real articles in the training data contain a <code>(Reuters)</code> dateline,
+      so the model partly learned “sounds like Reuters = real”. Try the first two examples above: the only
+      difference is that one word, and the confidence changes.</li>
+    <li>It judges <b>writing style</b>, not facts. A well-written false story can score as real, and a
+      sloppy true one as fake.</li>
+    <li>The training articles are political and world news from 2015–2018, so other topics and recent events are less reliable.</li>
+  </ul>
+
+  <footer>Built by <a href="../">Siddharth Patel</a> · B.Tech + M.Tech CSE, NIT Patna</footer>
+</main>
+
+<script src="predict.js"></script>
+<script>
+  const EXAMPLES = {
+    wire: "WASHINGTON (Reuters) - The U.S. Senate on Tuesday approved a bill to extend funding for federal highway programs through September, sending the measure to the House of Representatives, where lawmakers are expected to vote on it next week, congressional aides said. The bill passed 81-17 after senators from both parties agreed on how to pay for it, according to a statement from the Senate majority leader.",
+    nodateline: "WASHINGTON - The U.S. Senate on Tuesday approved a bill to extend funding for federal highway programs through September, sending the measure to the House of Representatives, where lawmakers are expected to vote on it next week, congressional aides said. The bill passed 81-17 after senators from both parties agreed on how to pay for it, according to a statement from the Senate majority leader.",
+    clickbait: "BREAKING: You won't BELIEVE what this senator just said about your money! Watch the video before it gets deleted. The mainstream media is hiding the truth and they don't want you to see this. Share this everywhere!!!"
+  };
+  const $ = (id) => document.getElementById(id);
+  let model = null;
+
+  fetch("model.json")
+    .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then((raw) => { model = buildModel(raw); $("status").textContent = "Model ready (10,000 words)."; })
+    .catch(() => { $("status").textContent = "Could not load the model. Please refresh the page."; });
+
+  function esc(s) { return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  function run() {
+    const text = $("text").value.trim();
+    if (!model) return;
+    if (!text) { $("status").textContent = "Please paste some text first."; return; }
+    const r = predict(model, text);
+    const real = r.pReal >= 0.5;
+    const conf = (real ? r.pReal : 1 - r.pReal) * 100;
+    $("result").style.display = "block";
+    $("verdict").textContent = real ? "✅ Looks like REAL news" : "❌ Looks like FAKE news";
+    $("verdict").className = "verdict " + (real ? "real" : "fake");
+    $("confidence").textContent = "Model confidence: " + conf.toFixed(1) + "%";
+    $("barfill").style.width = (r.pReal * 100).toFixed(1) + "%";
+    const top = (sign) => r.contrib.filter((c) => sign * c.value > 0).slice(0, 8);
+    const chips = (list, cls) => list.length
+      ? list.map((c) => `<span class="chip ${cls}">${esc(c.word)}</span>`).join("")
+      : '<span class="label">none</span>';
+    $("realwords").innerHTML = chips(top(1), "real");
+    $("fakewords").innerHTML = chips(top(-1), "fake");
+    $("known").textContent = r.known === 0
+      ? "None of these words are in the model's vocabulary, so this guess is not meaningful."
+      : `The model recognised ${r.known} different words in this text.`;
+    $("status").textContent = "";
+    $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  $("go").addEventListener("click", run);
+  document.querySelectorAll("[data-ex]").forEach((b) =>
+    b.addEventListener("click", () => { $("text").value = EXAMPLES[b.dataset.ex]; run(); }));
+</script>
+</body>
+</html>
