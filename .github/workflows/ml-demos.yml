@@ -1,0 +1,39 @@
+# Deploys the live ML demos (Hugging Face Spaces) for projects shown on this site.
+# Needs one repository secret: HF_TOKEN (a Hugging Face "Write" access token).
+name: ml-demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/ml-demos.yml", "demos/**"]
+
+concurrency:
+  group: ml-demos
+  cancel-in-progress: false
+
+jobs:
+  check-token:
+    runs-on: ubuntu-latest
+    outputs:
+      hf_user: ${{ steps.who.outputs.hf_user }}
+    steps:
+      - name: Check the Hugging Face token
+        id: who
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::notice::HF_TOKEN secret is not set yet; nothing to deploy."
+            exit 0
+          fi
+          pip install -q "huggingface_hub>=0.25"
+          python - <<'PY'
+          import os
+          from huggingface_hub import whoami
+          info = whoami()
+          role = info.get("auth", {}).get("accessToken", {}).get("role")
+          print(f"Hugging Face user: {info['name']} (token role: {role})")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"hf_user={info['name']}\n")
+          PY
