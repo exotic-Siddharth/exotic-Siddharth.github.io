@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Siddharth Patel · Machine Learning</title>
-  <meta name="description" content="Siddharth Patel, B.Tech CSE at NIT Patna. Machine learning, NLP and retrieval systems.">
+  <title>Siddharth Patel · Full-stack &amp; ML Engineer</title>
+  <meta name="description" content="Siddharth Patel, B.Tech + M.Tech CSE at NIT Patna (2029). Full-stack systems, machine learning and retrieval.">
   <style>
     :root {
       --bg: #0d1117; --panel: #161b22; --line: #30363d;
@@ -48,19 +48,69 @@
 <main>
   <header>
     <h1>Siddharth Patel</h1>
-    <div class="role">B.Tech Computer Science &amp; Engineering · NIT Patna</div>
+    <div class="role">B.Tech + M.Tech (Dual Degree) Computer Science &amp; Engineering · NIT Patna · Class of 2029</div>
     <p>
-      I build machine learning systems and care about measuring them properly: clean evaluation
-      splits, honest baselines and numbers that come from reproducible runs. My focus is NLP and
-      retrieval, and I've solved 300+ data-structures and algorithms problems.
+      My name is Siddharth Patel. I'm pursuing a B.Tech + M.Tech dual degree in Computer Science &amp;
+      Engineering at NIT Patna, graduating in 2029. I build full-stack systems that stay correct under
+      pressure (sandboxed code judging, end-to-end encryption, flash-sale ticketing) and ML / search
+      systems measured with honest evaluations. I've solved 360+ LeetCode problems in C++.
     </p>
     <div class="links">
       <a href="https://github.com/exotic-Siddharth">GitHub</a>
+      <a href="https://github.com/exotic-Siddharth/leetcode-solutions">LeetCode solutions</a>
     </div>
   </header>
 
   <section>
-    <h2>Projects</h2>
+    <h2>Full-stack systems</h2>
+
+    <div class="card">
+      <h3><a href="https://github.com/exotic-Siddharth/arbiter">Arbiter</a> · <a href="https://20-205-104-24.sslip.io">live demo</a></h3>
+      <p>Online judge with live programming contests.</p>
+      <ul>
+        <li>Untrusted C++, Python, Java and JavaScript runs in a hardened, throwaway Docker container per submission (no network, read-only root, capped memory and processes)</li>
+        <li>Verdicts stream to the browser test by test over Socket.IO; BullMQ workers scale separately from the API</li>
+        <li>Live ICPC scoreboard in Redis, Elo ratings, plagiarism check, admin panel with judge monitoring</li>
+      </ul>
+      <div class="tags"><span>TypeScript</span><span>React</span><span>Express</span><span>Socket.IO</span><span>BullMQ</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span></div>
+    </div>
+
+    <div class="card">
+      <h3><a href="https://github.com/exotic-Siddharth/cipherdrop">CipherDrop</a></h3>
+      <p>Zero-knowledge, end-to-end encrypted file sharing: the server only ever stores ciphertext.</p>
+      <ul>
+        <li>Files encrypted in the browser with AES-256-GCM using the STREAM construction, so chunks can't be reordered or truncated</li>
+        <li>Zero-knowledge accounts: Argon2id + HKDF key hierarchy, recovery key, TOTP two-factor login</li>
+        <li>735 unit/integration tests and 26 Playwright end-to-end tests; S3 storage, Prometheus metrics</li>
+      </ul>
+      <div class="tags"><span>TypeScript</span><span>Web Crypto</span><span>React</span><span>Express</span><span>PostgreSQL</span><span>Redis</span><span>S3</span></div>
+    </div>
+
+    <div class="card">
+      <h3><a href="https://github.com/exotic-Siddharth/seatlock">Seatlock</a></h3>
+      <p>Ticket booking built for flash sales, where thousands of buyers want the same seats. It never sells a seat twice.</p>
+      <ul>
+        <li>Live seat map of up to 2,400 seats updated over Server-Sent Events, with expiring seat holds</li>
+        <li>Fair waiting room and HMAC-signed, replay-protected payment webhooks</li>
+        <li>Four seat-locking strategies load-tested side by side with k6, with database invariants checked after every run</li>
+      </ul>
+      <div class="tags"><span>TypeScript</span><span>React</span><span>Express</span><span>PostgreSQL</span><span>Redis</span><span>nginx</span><span>k6</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Machine learning &amp; search</h2>
+
+    <div class="card">
+      <h3><a href="https://github.com/exotic-Siddharth/hinglish-product-search">Hinglish Product Search</a></h3>
+      <p>Product search for queries typed in Hinglish (romanised Hindi mixed with English), on Amazon's ESCI dataset.</p>
+      <ul>
+        <li>Hinglish query generator with a 185-word lexicon and spelling variants; held-out Hindi words to test generalisation</li>
+        <li>Thirteen retrieval setups compared (BM25 to a fine-tuned two-tower model) plus three rerankers, with bootstrap intervals</li>
+        <li>Served pipeline: FastAPI search API and demo page, int8-quantised reranker on CPU</li>
+      </ul>
+      <div class="tags"><span>Python</span><span>PyTorch</span><span>Sentence Transformers</span><span>BM25</span><span>FastAPI</span></div>
+    </div>
 
     <div class="card">
       <h3><a href="https://github.com/exotic-Siddharth/rag-eval-lab">rag-eval-lab</a></h3>
@@ -93,11 +143,13 @@
   <section>
     <h2>Skills</h2>
     <dl class="skills">
-      <dt>Languages</dt><dd>Python, C++, HTML/CSS</dd>
-      <dt>Machine learning</dt><dd>scikit-learn, PyTorch, Hugging Face Transformers, pandas, NumPy</dd>
-      <dt>Retrieval &amp; NLP</dt><dd>BM25, dense retrieval, cross-encoder reranking, TF-IDF, evaluation design</dd>
-      <dt>Engineering</dt><dd>FastAPI, Docker, GitHub Actions, Git</dd>
-      <dt>Problem solving</dt><dd>300+ DSA problems solved</dd>
+      <dt>Languages</dt><dd>C++, Python, TypeScript, JavaScript, SQL, HTML/CSS</dd>
+      <dt>Backend &amp; data</dt><dd>Node.js, Express, FastAPI, PostgreSQL, Redis, Prisma, BullMQ, Socket.IO</dd>
+      <dt>Frontend</dt><dd>React, Vite, Tailwind CSS, TanStack Query</dd>
+      <dt>Machine learning</dt><dd>PyTorch, Hugging Face Transformers, Sentence Transformers, scikit-learn, pandas, NumPy</dd>
+      <dt>Retrieval &amp; NLP</dt><dd>BM25, dense retrieval, hybrid fusion, cross-encoder reranking, RAG, evaluation design</dd>
+      <dt>DevOps &amp; testing</dt><dd>Docker, nginx, GitHub Actions, Vitest, Playwright, k6</dd>
+      <dt>Problem solving</dt><dd>360+ LeetCode problems solved in C++</dd>
     </dl>
   </section>
 
