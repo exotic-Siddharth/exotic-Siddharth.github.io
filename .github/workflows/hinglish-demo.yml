@@ -1,0 +1,82 @@
+# Builds the in-browser Hinglish Product Search demo (/hinglish-search/) from its project repo:
+# downloads ESCI, prepares the data, exports a product sample and the Python results, checks the
+# JavaScript port against them, then publishes the page.
+name: hinglish-demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/hinglish-demo.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-publish
+  cancel-in-progress: false
+
+jobs:
+  hinglish-search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: exotic-Siddharth/hinglish-product-search
+          path: src
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unit tests for the JavaScript port
+        working-directory: src/web
+        run: node --test test_hps.mjs
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -q numpy scipy scikit-learn pandas pyarrow
+
+      - name: Download ESCI (github.com/amazon-science/esci-data)
+        working-directory: src
+        run: |
+          mkdir -p data/raw
+          for f in examples products; do
+            curl -fsSL --retry 3 -o data/raw/shopping_queries_dataset_$f.parquet \
+              https://github.com/amazon-science/esci-data/raw/main/shopping_queries_dataset/shopping_queries_dataset_$f.parquet
+          done
+          ls -la data/raw
+
+      - name: Prepare the processed dataset (hps.prepare)
+        working-directory: src
+        run: PYTHONPATH=src python -m hps.prepare
+
+      - name: Export the product sample, examples and the Python results
+        working-directory: src
+        run: PYTHONPATH=src python web/export_data.py --out web/build
+
+      - name: Parity check against the Python code
+        working-directory: src/web
+        run: |
+          node parity.mjs build
+          ls -la build
+          for f in build/*.json; do echo "$f gzip: $(gzip -c "$f" | wc -c) bytes"; done
+
+      - name: Publish to /hinglish-search/
+        run: |
+          rm -rf hinglish-search && mkdir -p hinglish-search/data
+          cp src/web/index.html src/web/hps.js hinglish-search/
+          cp src/web/build/products.json src/web/build/examples.json src/web/build/rewrite.json \
+             src/web/build/meta.json src/web/build/parity.json hinglish-search/data/
+          git add hinglish-search
+          if git diff --cached --quiet; then echo "No changes to publish."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update Hinglish search in-browser demo (hinglish-product-search@$(git -C src rev-parse --short HEAD))"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push && break; sleep 5; done
