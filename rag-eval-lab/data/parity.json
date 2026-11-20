@@ -14,7 +14,7 @@
   "python": 0.96,
   "browser": 0.96
  },
- "node_ms_per_question": 579,
+ "node_ms_per_question": 638,
  "models": {
   "embed_model": "Xenova/bge-small-en-v1.5",
   "rerank_model": "Xenova/ms-marco-MiniLM-L-6-v2",
