@@ -1,0 +1,36 @@
+{
+ "questions": 200,
+ "answerable": 100,
+ "same_bm25_top10": 1,
+ "same_dense_top1": 0.905,
+ "fused_top20_overlap": 0.951,
+ "same_top_passage": 0.995,
+ "same_answer": 0.99,
+ "recall_at_1": {
+  "python": 0.91,
+  "browser": 0.91
+ },
+ "recall_at_3": {
+  "python": 0.96,
+  "browser": 0.96
+ },
+ "node_ms_per_question": 579,
+ "models": {
+  "embed_model": "Xenova/bge-small-en-v1.5",
+  "rerank_model": "Xenova/ms-marco-MiniLM-L-6-v2",
+  "dtype": "q8",
+  "query_prefix": "Represent this sentence for searching relevant passages: ",
+  "dim": 384
+ },
+ "python": {
+  "embed_model": "BAAI/bge-small-en-v1.5",
+  "query_prefix": "Represent this sentence for searching relevant passages: ",
+  "rerank_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+  "versions": {
+   "torch": "2.15.0+cpu",
+   "transformers": "5.23.0",
+   "sentence-transformers": "6.3.0"
+  }
+ },
+ "built": "2026-11-20"
+}
