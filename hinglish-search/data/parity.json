@@ -1,0 +1,36 @@
+{
+ "examples": 523,
+ "products": 40000,
+ "same_rewrite": 1,
+ "same_top10_scores": 1,
+ "same_top10_order": 0.572,
+ "ndcg": {
+  "python": {
+   "generated": {
+    "hinglish": 0.3549,
+    "rewritten": 0.4759,
+    "english": 0.4921
+   },
+   "free-form": {
+    "hinglish": 0.2959,
+    "rewritten": 0.4048,
+    "english": 0.5033
+   }
+  },
+  "browser": {
+   "generated": {
+    "hinglish": 0.3545,
+    "rewritten": 0.4759,
+    "english": 0.4922
+   },
+   "free-form": {
+    "hinglish": 0.2951,
+    "rewritten": 0.404,
+    "english": 0.5047
+   }
+  }
+ },
+ "node_build_ms": 268,
+ "node_search_ms": 0.8,
+ "built": "2026-11-20"
+}

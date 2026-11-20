@@ -1,0 +1,1 @@
+{"products":40000,"evaluation_products":181457,"examples":523,"ndcg":{"generated":{"hinglish":0.3549,"rewritten":0.4759,"english":0.4921},"free-form":{"hinglish":0.2959,"rewritten":0.4048,"english":0.5033}},"counts":{"generated":400,"free-form":123}}
