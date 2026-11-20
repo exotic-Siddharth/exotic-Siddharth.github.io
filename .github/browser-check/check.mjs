@@ -40,8 +40,33 @@ async function fakeNews(name, contextOptions) {
   await browser.close();
 }
 
+async function hinglishSearch(name, contextOptions) {
+  const browser = await chromium.launch();
+  const page = await (await browser.newContext(contextOptions)).newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  const t0 = Date.now();
+  await page.goto(`${BASE}/hinglish-search/`);
+  await page.waitForFunction(() => !document.getElementById("go").disabled, null, { timeout: 60000 });
+  console.log(`[${name}] hinglish-search ready in ${((Date.now() - t0) / 1000).toFixed(1)} s: ${await page.innerText("#status")}`);
+  for (const q of ["gents ke liye kaala jacket", "bachon ke liye pani wali botal"]) {
+    await page.fill("#q", q);
+    await page.click("#go");
+    await page.waitForSelector("#results", { state: "visible" });
+    const a = await page.$$eval("#listA .item .t", (els) => els.slice(0, 3).map((e) => e.textContent));
+    const b = await page.$$eval("#listB .item .t", (els) => els.slice(0, 3).map((e) => e.textContent));
+    console.log(`   Q: ${q}\n   ${await page.innerText("#searched")}\n   with rewrite: ${a.join(" || ")}\n   without: ${b.join(" || ") || "(nothing)"}`);
+  }
+  await page.click(".ex");
+  await page.waitForTimeout(300);
+  console.log(`   example: ${await page.inputValue("#q")} | ${await page.innerText("#scoreA")} vs ${await page.innerText("#scoreB")}`);
+  await page.screenshot({ path: `hinglish-${name}.png` });
+  if (errors.length) { failed = true; console.log(`[${name}] page errors:`, errors); }
+  await browser.close();
+}
+
 for (const [name, opts] of [["desktop", { viewport: { width: 1280, height: 900 } }], ["phone", devices["Pixel 7"]]]) {
-  try { await ragEvalLab(name, opts); await fakeNews(name, opts); }
+  try { await ragEvalLab(name, opts); await fakeNews(name, opts); await hinglishSearch(name, opts); }
   catch (e) { failed = true; console.log(`[${name}] FAILED: ${e.message}`); }
 }
 process.exit(failed ? 1 : 0);
