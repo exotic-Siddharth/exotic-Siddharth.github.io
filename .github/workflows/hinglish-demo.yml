@@ -76,7 +76,7 @@ jobs:
              src/web/build/meta.json src/web/build/parity.json hinglish-search/data/
           git add hinglish-search
           if git diff --cached --quiet; then echo "No changes to publish."; exit 0; fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "exotic-Siddharth"
+          git config user.email "205049674+exotic-Siddharth@users.noreply.github.com"
           git commit -m "Update Hinglish search in-browser demo (hinglish-product-search@$(git -C src rev-parse --short HEAD))"
           for i in 1 2 3; do git pull --rebase -q origin main && git push && break; sleep 5; done
